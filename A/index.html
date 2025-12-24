@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Vertical test1</title>
+<title>Vertical testss</title>
 
 <style>
 html, body {
@@ -45,10 +45,11 @@ html, body {
 
 <div id="viewer">
   <div id="track">
-    <div class="page"><img src="images/intro.png"></div>
-    <div class="page"><img src="images/page1.jpeg"></div>
-    <div class="page"><img src="images/page2.jpeg"></div>
+    <!-- 左から順に並べる（右→左読み） -->
     <div class="page"><img src="images/page3.jpeg"></div>
+    <div class="page"><img src="images/page2.jpeg"></div>
+    <div class="page"><img src="images/page1.jpeg"></div>
+    <div class="page"><img src="images/intro.png"></div>
   </div>
 </div>
 
@@ -56,18 +57,24 @@ html, body {
 const track = document.getElementById("track");
 const pages = document.querySelectorAll(".page");
 
-let current = 0;
+// ★ 最初は一番右（intro）
+let current = pages.length - 1;
+
 let startX = 0;
 let currentX = 0;
 let dragging = false;
 
-// 軽いスワイプ判定
+// 軽いスワイプ
 const threshold = 30;
 
 function updatePosition(animate = true) {
   track.style.transition = animate ? "transform 0.25s ease-out" : "none";
-  track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+  track.style.transform =
+    `translateX(${-current * window.innerWidth}px)`;
 }
+
+// 初期位置を反映
+updatePosition(false);
 
 track.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
@@ -88,26 +95,31 @@ track.addEventListener("touchend", () => {
   dragging = false;
   const diff = currentX - startX;
 
-  // 👉 右 → 左スワイプ：次ページ
-  if (diff < -threshold && current < pages.length - 1) {
-    current++;
-  }
-  // 👉 左 → 右スワイプ：前ページ
-  else if (diff > threshold && current > 0) {
+  // 👉 右 → 左：次ページ（左へ）
+  if (diff < -threshold && current > 0) {
     current--;
+  }
+  // 👉 左 → 右：前ページ（右へ）
+  else if (diff > threshold && current < pages.length - 1) {
+    current++;
   }
 
   updatePosition(true);
 });
 
-// タップ操作（右＝次）
+// タップ操作
 track.addEventListener("click", e => {
   const x = e.clientX;
-  if (x > window.innerWidth / 2 && current < pages.length - 1) {
-    current++;
-  } else if (x <= window.innerWidth / 2 && current > 0) {
+
+  // 左タップ：次ページ
+  if (x < window.innerWidth / 2 && current > 0) {
     current--;
   }
+  // 右タップ：前ページ
+  else if (x >= window.innerWidth / 2 && current < pages.length - 1) {
+    current++;
+  }
+
   updatePosition(true);
 });
 </script>
