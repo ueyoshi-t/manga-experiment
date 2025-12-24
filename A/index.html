@@ -2,18 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aテスト</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>縦レイアウト漫画</title>
 
   <style>
     body {
       margin: 0;
-      padding: 0;
       background-color: #000;
+      overflow: hidden;
     }
     img {
-      width: 100%;
-      height: auto;
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
       display: block;
     }
   </style>
@@ -21,14 +22,67 @@
 
 <body>
 
-  <!-- 説明用画像 -->
-  <img src="images/intro.png" alt="説明">
+<img id="page" src="images/intro.png" alt="漫画ページ">
 
-  <!-- 漫画ページ -->
-  <img src="images/page1.jpeg" alt="ページ1">
-  <img src="images/page2.jpeg" alt="ページ2">
-  <img src="images/page3.jpeg" alt="ページ3">
+<script>
+  // 表示するページ一覧（順番どおり）
+  const pages = [
+    "images/intro.png",
+    "images/page1.jpeg",
+    "images/page2.jpeg",
+    "images/page3.jpeg"
+  ];
 
+  let current = 0;
+  const img = document.getElementById("page");
+
+  function showPage() {
+    img.src = pages[current];
+  }
+
+  // 画面タップ操作
+  document.addEventListener("click", (e) => {
+    const x = e.clientX;
+    const width = window.innerWidth;
+
+    if (x < width / 2) {
+      // 左側タップ → 次のページ
+      if (current < pages.length - 1) {
+        current++;
+        showPage();
+      }
+    } else {
+      // 右側タップ → 前のページ
+      if (current > 0) {
+        current--;
+        showPage();
+      }
+    }
+  });
+
+  // スワイプ操作
+  let startX = 0;
+
+  document.addEventListener("touchstart", (e) => {
+    startX = e.touches[0].clientX;
+  });
+
+  document.addEventListener("touchend", (e) => {
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
+
+    if (diff < -50 && current < pages.length - 1) {
+      // 左スワイプ → 次のページ
+      current++;
+      showPage();
+    }
+    if (diff > 50 && current > 0) {
+      // 右スワイプ → 前のページ
+      current--;
+      showPage();
+    }
+  });
+</script>
 
 </body>
 </html>
