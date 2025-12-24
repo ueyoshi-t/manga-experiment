@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Vertical testss</title>
+<title>Vertical testneo</title>
 
 <style>
 html, body {
@@ -45,7 +45,7 @@ html, body {
 
 <div id="viewer">
   <div id="track">
-    <!-- 左から順に並べる（右→左読み） -->
+    <!-- 右→左に並べる -->
     <div class="page"><img src="images/page3.jpeg"></div>
     <div class="page"><img src="images/page2.jpeg"></div>
     <div class="page"><img src="images/page1.jpeg"></div>
@@ -57,70 +57,74 @@ html, body {
 const track = document.getElementById("track");
 const pages = document.querySelectorAll(".page");
 
-// ★ 最初は一番右（intro）
+// 最初は一番右（intro）
 let current = pages.length - 1;
 
 let startX = 0;
 let currentX = 0;
-let dragging = false;
+let isTouching = false;
 
-// 軽いスワイプ
 const threshold = 30;
 
-function updatePosition(animate = true) {
+function setPosition(animate = true) {
   track.style.transition = animate ? "transform 0.25s ease-out" : "none";
   track.style.transform =
     `translateX(${-current * window.innerWidth}px)`;
 }
 
-// 初期位置を反映
-updatePosition(false);
+// 初期位置
+setPosition(false);
 
 track.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
   currentX = startX;
-  dragging = true;
-  updatePosition(false);
+  isTouching = true;
+  setPosition(false);
 });
 
 track.addEventListener("touchmove", e => {
-  if (!dragging) return;
+  if (!isTouching) return;
+
   currentX = e.touches[0].clientX;
   const diff = currentX - startX;
+
+  // ★ 指の動きにそのまま追従
   track.style.transform =
     `translateX(${-current * window.innerWidth + diff}px)`;
 });
 
-track.addEventListener("touchend", () => {
-  dragging = false;
+track.addEventListener("touchend", e => {
+  isTouching = false;
   const diff = currentX - startX;
 
-  // 👉 右 → 左：次ページ（左へ）
-  if (diff < -threshold && current > 0) {
+  // 左→右スワイプ：次ページ（左へ）
+  if (diff > threshold && current > 0) {
     current--;
   }
-  // 👉 左 → 右：前ページ（右へ）
-  else if (diff > threshold && current < pages.length - 1) {
+  // 右→左スワイプ：前ページ（右へ）
+  else if (diff < -threshold && current < pages.length - 1) {
     current++;
   }
 
-  updatePosition(true);
+  setPosition(true);
 });
 
-// タップ操作
-track.addEventListener("click", e => {
-  const x = e.clientX;
+// タップ判定（touchで統一）
+track.addEventListener("touchend", e => {
+  if (Math.abs(currentX - startX) > 10) return;
+
+  const tapX = startX;
 
   // 左タップ：次ページ
-  if (x < window.innerWidth / 2 && current > 0) {
+  if (tapX < window.innerWidth / 2 && current > 0) {
     current--;
   }
   // 右タップ：前ページ
-  else if (x >= window.innerWidth / 2 && current < pages.length - 1) {
+  else if (tapX >= window.innerWidth / 2 && current < pages.length - 1) {
     current++;
   }
 
-  updatePosition(true);
+  setPosition(true);
 });
 </script>
 
