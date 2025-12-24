@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Vertical test</title>
+<title>Vertical test1</title>
 
 <style>
 html, body {
@@ -23,7 +23,6 @@ html, body {
 #track {
   display: flex;
   height: 100%;
-  transform: translateX(0);
 }
 
 .page {
@@ -46,10 +45,7 @@ html, body {
 
 <div id="viewer">
   <div id="track">
-    <!-- 説明画像 -->
     <div class="page"><img src="images/intro.png"></div>
-
-    <!-- 本編 -->
     <div class="page"><img src="images/page1.jpeg"></div>
     <div class="page"><img src="images/page2.jpeg"></div>
     <div class="page"><img src="images/page3.jpeg"></div>
@@ -65,7 +61,7 @@ let startX = 0;
 let currentX = 0;
 let dragging = false;
 
-// ★ スワイプ判定をかなり軽く
+// 軽いスワイプ判定
 const threshold = 30;
 
 function updatePosition(animate = true) {
@@ -92,25 +88,24 @@ track.addEventListener("touchend", () => {
   dragging = false;
   const diff = currentX - startX;
 
-  // 左 → 右：次ページ
-  if (diff > threshold && current < pages.length - 1) {
+  // 👉 右 → 左スワイプ：次ページ
+  if (diff < -threshold && current < pages.length - 1) {
     current++;
   }
-
-  // 右 → 左：前ページ
-  else if (diff < -threshold && current > 0) {
+  // 👉 左 → 右スワイプ：前ページ
+  else if (diff > threshold && current > 0) {
     current--;
   }
 
   updatePosition(true);
 });
 
-// タップ操作（左＝次）
+// タップ操作（右＝次）
 track.addEventListener("click", e => {
   const x = e.clientX;
-  if (x < window.innerWidth / 2 && current < pages.length - 1) {
+  if (x > window.innerWidth / 2 && current < pages.length - 1) {
     current++;
-  } else if (x >= window.innerWidth / 2 && current > 0) {
+  } else if (x <= window.innerWidth / 2 && current > 0) {
     current--;
   }
   updatePosition(true);
