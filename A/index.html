@@ -71,16 +71,16 @@
     const endX = e.changedTouches[0].clientX;
     const diff = endX - startX;
 
-    if (diff < -50 && current < pages.length - 1) {
-      // 左スワイプ → 次のページ
-      current++;
-      showPage();
-    }
-    if (diff > 50 && current > 0) {
-      // 右スワイプ → 前のページ
-      current--;
-      showPage();
-    }
+    if (diff > 50 && current < pages.length - 1) {
+  // 左 → 右スワイプ → 次のページ
+  current++;
+  showPage();
+}
+if (diff < -50 && current > 0) {
+  // 右 → 左スワイプ → 前のページ
+  current--;
+  showPage();
+}
   });
 </script>
 
