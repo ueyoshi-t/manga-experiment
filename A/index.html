@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>A test</title>
+<title>Vertical test</title>
 
 <style>
 html, body {
@@ -17,7 +17,6 @@ html, body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  position: relative;
   background: black;
 }
 
@@ -47,6 +46,10 @@ html, body {
 
 <div id="viewer">
   <div id="track">
+    <!-- 説明画像 -->
+    <div class="page"><img src="images/intro.png"></div>
+
+    <!-- 本編 -->
     <div class="page"><img src="images/page1.jpeg"></div>
     <div class="page"><img src="images/page2.jpeg"></div>
     <div class="page"><img src="images/page3.jpeg"></div>
@@ -56,57 +59,53 @@ html, body {
 <script>
 const track = document.getElementById("track");
 const pages = document.querySelectorAll(".page");
-let current = 0;
 
+let current = 0;
 let startX = 0;
 let currentX = 0;
-let isDragging = false;
+let dragging = false;
 
-const threshold = 80; // ページ送り判定距離
+// ★ スワイプ判定をかなり軽く
+const threshold = 30;
 
 function updatePosition(animate = true) {
-  if (animate) {
-    track.style.transition = "transform 0.3s ease";
-  } else {
-    track.style.transition = "none";
-  }
+  track.style.transition = animate ? "transform 0.25s ease-out" : "none";
   track.style.transform = `translateX(${-current * window.innerWidth}px)`;
 }
 
 track.addEventListener("touchstart", e => {
   startX = e.touches[0].clientX;
   currentX = startX;
-  isDragging = true;
+  dragging = true;
   updatePosition(false);
 });
 
 track.addEventListener("touchmove", e => {
-  if (!isDragging) return;
+  if (!dragging) return;
   currentX = e.touches[0].clientX;
   const diff = currentX - startX;
-
-  const offset = -current * window.innerWidth + diff;
-  track.style.transform = `translateX(${offset}px)`;
+  track.style.transform =
+    `translateX(${-current * window.innerWidth + diff}px)`;
 });
 
 track.addEventListener("touchend", () => {
-  isDragging = false;
+  dragging = false;
   const diff = currentX - startX;
 
-  // 左 → 右スワイプ：次ページ
+  // 左 → 右：次ページ
   if (diff > threshold && current < pages.length - 1) {
     current++;
   }
 
-  // 右 → 左スワイプ：前ページ
-  if (diff < -threshold && current > 0) {
+  // 右 → 左：前ページ
+  else if (diff < -threshold && current > 0) {
     current--;
   }
 
   updatePosition(true);
 });
 
-// タップ操作（補助）
+// タップ操作（左＝次）
 track.addEventListener("click", e => {
   const x = e.clientX;
   if (x < window.innerWidth / 2 && current < pages.length - 1) {
