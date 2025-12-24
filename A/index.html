@@ -1,87 +1,121 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>縦レイアウトTEST</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>A test</title>
 
-  <style>
-    body {
-      margin: 0;
-      background-color: #000;
-      overflow: hidden;
-    }
-    img {
-      width: 100vw;
-      height: 100vh;
-      object-fit: contain;
-      display: block;
-    }
-  </style>
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+#viewer {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  background: black;
+}
+
+#track {
+  display: flex;
+  height: 100%;
+  transform: translateX(0);
+}
+
+.page {
+  min-width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.page img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+</style>
 </head>
 
 <body>
 
-<img id="page" src="images/intro.png" alt="漫画ページ">
+<div id="viewer">
+  <div id="track">
+    <div class="page"><img src="images/page1.jpeg"></div>
+    <div class="page"><img src="images/page2.jpeg"></div>
+    <div class="page"><img src="images/page3.jpeg"></div>
+  </div>
+</div>
 
 <script>
-  // 表示するページ一覧（順番どおり）
-  const pages = [
-    "images/intro.png",
-    "images/page1.jpeg",
-    "images/page2.jpeg",
-    "images/page3.jpeg"
-  ];
+const track = document.getElementById("track");
+const pages = document.querySelectorAll(".page");
+let current = 0;
 
-  let current = 0;
-  const img = document.getElementById("page");
+let startX = 0;
+let currentX = 0;
+let isDragging = false;
 
-  function showPage() {
-    img.src = pages[current];
+const threshold = 80; // ページ送り判定距離
+
+function updatePosition(animate = true) {
+  if (animate) {
+    track.style.transition = "transform 0.3s ease";
+  } else {
+    track.style.transition = "none";
+  }
+  track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+}
+
+track.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+  currentX = startX;
+  isDragging = true;
+  updatePosition(false);
+});
+
+track.addEventListener("touchmove", e => {
+  if (!isDragging) return;
+  currentX = e.touches[0].clientX;
+  const diff = currentX - startX;
+
+  const offset = -current * window.innerWidth + diff;
+  track.style.transform = `translateX(${offset}px)`;
+});
+
+track.addEventListener("touchend", () => {
+  isDragging = false;
+  const diff = currentX - startX;
+
+  // 左 → 右スワイプ：次ページ
+  if (diff > threshold && current < pages.length - 1) {
+    current++;
   }
 
-  // 画面タップ操作
-  document.addEventListener("click", (e) => {
-    const x = e.clientX;
-    const width = window.innerWidth;
+  // 右 → 左スワイプ：前ページ
+  if (diff < -threshold && current > 0) {
+    current--;
+  }
 
-    if (x < width / 2) {
-      // 左側タップ → 次のページ
-      if (current < pages.length - 1) {
-        current++;
-        showPage();
-      }
-    } else {
-      // 右側タップ → 前のページ
-      if (current > 0) {
-        current--;
-        showPage();
-      }
-    }
-  });
+  updatePosition(true);
+});
 
-  // スワイプ操作
-  let startX = 0;
-
-  document.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-  });
-
-  document.addEventListener("touchend", (e) => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - startX;
-
-    if (diff > 50 && current < pages.length - 1) {
-  // 左 → 右スワイプ → 次のページ
-  current++;
-  showPage();
-}
-if (diff < -50 && current > 0) {
-  // 右 → 左スワイプ → 前のページ
-  current--;
-  showPage();
-}
-  });
+// タップ操作（補助）
+track.addEventListener("click", e => {
+  const x = e.clientX;
+  if (x < window.innerWidth / 2 && current < pages.length - 1) {
+    current++;
+  } else if (x >= window.innerWidth / 2 && current > 0) {
+    current--;
+  }
+  updatePosition(true);
+});
 </script>
 
 </body>
