@@ -2,13 +2,16 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Vertical test</title>
 
 <style>
 html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
   touch-action: none;
 }
@@ -23,6 +26,7 @@ html, body {
 #track {
   display: flex;
   height: 100%;
+  transform: translateX(0);
 }
 
 .page {
@@ -33,10 +37,12 @@ html, body {
   align-items: center;
 }
 
+/* ★これが超重要 */
 .page img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  pointer-events: none;
 }
 </style>
 </head>
@@ -45,6 +51,7 @@ html, body {
 
 <div id="viewer">
   <div id="track">
+    <!-- 次ページは左にある配置 -->
     <div class="page"><img src="images/page3.jpeg"></div>
     <div class="page"><img src="images/page2.jpeg"></div>
     <div class="page"><img src="images/page1.jpeg"></div>
@@ -58,62 +65,51 @@ const pages = document.querySelectorAll(".page");
 
 let current = pages.length - 1; // introから開始
 let startX = 0;
-let currentX = 0;
-let touching = false;
+let nowX = 0;
+let dragging = false;
 
-const threshold = 30;
+const swipeThreshold = 20;
 
-function update(animate = true) {
+function render(animate = true) {
   track.style.transition = animate ? "transform 0.25s ease-out" : "none";
-  track.style.transform = `translateX(${-current * window.innerWidth}px)`;
+  track.style.transform =
+    `translateX(${-current * window.innerWidth}px)`;
 }
 
-update(false);
+render(false);
 
 track.addEventListener("touchstart", e => {
-  e.preventDefault();
   startX = e.touches[0].clientX;
-  currentX = startX;
-  touching = true;
-  update(false);
+  nowX = startX;
+  dragging = true;
+  track.style.transition = "none";
 }, { passive: false });
 
 track.addEventListener("touchmove", e => {
-  if (!touching) return;
+  if (!dragging) return;
   e.preventDefault();
-  currentX = e.touches[0].clientX;
-  const diff = currentX - startX;
+  nowX = e.touches[0].clientX;
+  const diff = nowX - startX;
   track.style.transform =
     `translateX(${-current * window.innerWidth + diff}px)`;
 }, { passive: false });
 
 track.addEventListener("touchend", e => {
-  e.preventDefault();
-  touching = false;
+  dragging = false;
+  const diff = nowX - startX;
 
-  const diff = currentX - startX;
-
-  // スワイプ判定
-  if (Math.abs(diff) > threshold) {
-    // 左→右：次ページ（左にある）
-    if (diff > 0 && current > 0) {
-      current--;
-    }
-    // 右→左：前ページ
-    else if (diff < 0 && current < pages.length - 1) {
-      current++;
-    }
+  // スワイプ
+  if (Math.abs(diff) > swipeThreshold) {
+    if (diff > 0 && current > 0) current--;       // 左→右：次ページ
+    else if (diff < 0 && current < pages.length - 1) current++;
   }
-  // タップ判定
+  // タップ
   else {
-    if (startX < window.innerWidth / 2 && current > 0) {
-      current--;
-    } else if (startX >= window.innerWidth / 2 && current < pages.length - 1) {
-      current++;
-    }
+    if (startX < window.innerWidth / 2 && current > 0) current--;
+    else if (startX >= window.innerWidth / 2 && current < pages.length - 1) current++;
   }
 
-  update(true);
+  render(true);
 }, { passive: false });
 </script>
 
