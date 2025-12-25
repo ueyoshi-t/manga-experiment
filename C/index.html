@@ -1,1 +1,128 @@
-C test
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>縦レイアウト漫画1234</title>
+
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      overflow: hidden;
+    }
+    img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+<img id="page" src="images/intro.png" alt="漫画ページ">
+
+<script>
+const pages = [
+  "images/intro.png",
+  "images/page1.jpeg",
+  "images/page2.jpeg",
+  "images/page3.jpeg"
+];
+
+let current = 0;
+const img = document.getElementById("page");
+
+// 端タップの有効範囲（画面の15%）
+const EDGE_RATIO = 0.15;
+
+// スワイプ判定距離
+const SWIPE_THRESHOLD = 30;
+
+function showPage() {
+  img.src = pages[current];
+}
+
+/* ===== タップ操作 ===== */
+document.addEventListener("click", (e) => {
+  const x = e.clientX;
+  const width = window.innerWidth;
+  const edge = width * EDGE_RATIO;
+
+  // 左端タップ → 次のページ
+  if (x < edge && current < pages.length - 1) {
+    current++;
+    showPage();
+  }
+
+  // 右端タップ → 前のページ
+  else if (x > width - edge && current > 0) {
+    current--;
+    showPage();
+  }
+  // 中央は何もしない
+});
+
+/* ===== スワイプ操作 ===== */
+let startX = 0;
+
+let isPinching = false;
+
+document.addEventListener("touchstart", (e) => {
+  if (e.touches.length !== 1) {
+    isPinching = true;
+    return;
+  }
+  isPinching = false;
+  startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", (e) => {
+  if (isPinching) {
+    startX = 0;
+    return;
+  }
+
+  if (!startX) return;
+
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  if (diff > SWIPE_THRESHOLD && current < pages.length - 1) {
+    current++;
+    showPage();
+  } else if (diff < -SWIPE_THRESHOLD && current > 0) {
+    current--;
+    showPage();
+  }
+
+  startX = 0;
+});
+
+
+document.addEventListener("touchend", (e) => {
+  if (!startX) return;
+
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  // 左 → 右 スワイプ → 次ページ
+  if (diff > SWIPE_THRESHOLD && current < pages.length - 1) {
+    current++;
+    showPage();
+  }
+
+  // 右 → 左 スワイプ → 前ページ
+  else if (diff < -SWIPE_THRESHOLD && current > 0) {
+    current--;
+    showPage();
+  }
+
+  startX = 0;
+});
+</script>
+
+</body>
+</html>
