@@ -6,7 +6,7 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
   >
-  <title>横レイアウト漫画a</title>
+  <title>横レイアウト漫画1a</title>
 
   <style>
     html, body {
@@ -21,20 +21,18 @@
     }
 
     #viewer {
-      width: 100vw;
-      height: 100svh;
+  width: 100vw;
+  height: 100svh;
 
-      display: flex;
-      justify-content: center;
-      align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-      /* ノッチ対策 */
-      padding:
-        env(safe-area-inset-top)
-        env(safe-area-inset-right)
-        env(safe-area-inset-bottom)
-        env(safe-area-inset-left);
-    }
+  /* 上下だけ safe-area を考慮 */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 
     img {
       max-width: 100%;
