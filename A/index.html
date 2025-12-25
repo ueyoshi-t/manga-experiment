@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>縦レイアウト漫画a</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>縦レイアウト漫画123</title>
 
   <style>
     body {
@@ -25,65 +25,75 @@
 <img id="page" src="images/intro.png" alt="漫画ページ">
 
 <script>
-  // 表示するページ一覧（順番どおり）
-  const pages = [
-    "images/intro.png",
-    "images/page1.jpeg",
-    "images/page2.jpeg",
-    "images/page3.jpeg"
-  ];
+const pages = [
+  "images/intro.png",
+  "images/page1.jpeg",
+  "images/page2.jpeg",
+  "images/page3.jpeg"
+];
 
-  let current = 0;
-  const img = document.getElementById("page");
+let current = 0;
+const img = document.getElementById("page");
 
-  function showPage() {
-    img.src = pages[current];
+// 端タップの有効範囲（画面の15%）
+const EDGE_RATIO = 0.15;
+
+// スワイプ判定距離
+const SWIPE_THRESHOLD = 30;
+
+function showPage() {
+  img.src = pages[current];
+}
+
+/* ===== タップ操作 ===== */
+document.addEventListener("click", (e) => {
+  const x = e.clientX;
+  const width = window.innerWidth;
+  const edge = width * EDGE_RATIO;
+
+  // 左端タップ → 次のページ
+  if (x < edge && current < pages.length - 1) {
+    current++;
+    showPage();
   }
 
-  // 画面タップ操作
-  document.addEventListener("click", (e) => {
-    const x = e.clientX;
-    const width = window.innerWidth;
+  // 右端タップ → 前のページ
+  else if (x > width - edge && current > 0) {
+    current--;
+    showPage();
+  }
+  // 中央は何もしない
+});
 
-    if (x < width / 2) {
-      // 左側タップ → 次のページ
-      if (current < pages.length - 1) {
-        current++;
-        showPage();
-      }
-    } else {
-      // 右側タップ → 前のページ
-      if (current > 0) {
-        current--;
-        showPage();
-      }
-    }
-  });
+/* ===== スワイプ操作 ===== */
+let startX = 0;
 
-  // スワイプ操作
-  let startX = 0;
+document.addEventListener("touchstart", (e) => {
+  if (e.touches.length !== 1) return; // ピンチは無視
+  startX = e.touches[0].clientX;
+});
 
-  document.addEventListener("touchstart", (e) => {
-    startX = e.touches[0].clientX;
-  });
+document.addEventListener("touchend", (e) => {
+  if (!startX) return;
 
-  document.addEventListener("touchend", (e) => {
-    const endX = e.changedTouches[0].clientX;
-    const diff = endX - startX;
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
 
-    if (diff < 50 && current < pages.length - 1) {
-      // 左スワイプ → 次のページ
-      current++;
-      showPage();
-    }
-    if (diff > -50 && current > 0) {
-      // 右スワイプ → 前のページ
-      current--;
-      showPage();
-    }
-  });
+  // 左 → 右 スワイプ → 次ページ
+  if (diff > SWIPE_THRESHOLD && current < pages.length - 1) {
+    current++;
+    showPage();
+  }
+
+  // 右 → 左 スワイプ → 前ページ
+  else if (diff < -SWIPE_THRESHOLD && current > 0) {
+    current--;
+    showPage();
+  }
+
+  startX = 0;
+});
 </script>
 
 </body>
 </html>
-
