@@ -1,1 +1,116 @@
-B test
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>横レイアウト漫画</title>
+
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      overflow: hidden;
+    }
+    img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: contain;
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+<img id="page" src="images/intro.png" alt="漫画ページ">
+
+<script>
+/* ===== ページ順（右に進む） ===== */
+const pages = [
+  "images/intro.png",
+  "images/page1.jpeg",
+  "images/page2.jpeg",
+  "images/page3.jpeg",
+  "images/page4.jpeg",
+  "images/page5.jpeg",
+  "images/page6.jpeg",
+  "images/page7.jpeg",
+  "images/page8.jpeg"
+];
+
+let current = 0;
+const img = document.getElementById("page");
+
+/* ===== 設定値 ===== */
+const EDGE_RATIO = 0.15;        // 画面端15%
+const SWIPE_THRESHOLD = 30;     // スワイプ感度
+
+/* ===== プリロード ===== */
+pages.forEach(src => {
+  const preImg = new Image();
+  preImg.src = src;
+});
+
+function showPage() {
+  img.src = pages[current];
+}
+
+/* ===== タップ操作 ===== */
+document.addEventListener("click", (e) => {
+  const x = e.clientX;
+  const width = window.innerWidth;
+  const edge = width * EDGE_RATIO;
+
+  // 右端タップ → 次のページ
+  if (x > width - edge && current < pages.length - 1) {
+    current++;
+    showPage();
+  }
+  // 左端タップ → 前のページ
+  else if (x < edge && current > 0) {
+    current--;
+    showPage();
+  }
+  // 中央は無反応
+});
+
+/* ===== スワイプ操作 ===== */
+let startX = 0;
+let isPinching = false;
+
+document.addEventListener("touchstart", (e) => {
+  if (e.touches.length !== 1) {
+    isPinching = true;
+    return;
+  }
+  isPinching = false;
+  startX = e.touches[0].clientX;
+});
+
+document.addEventListener("touchend", (e) => {
+  if (isPinching || !startX) {
+    startX = 0;
+    return;
+  }
+
+  const endX = e.changedTouches[0].clientX;
+  const diff = endX - startX;
+
+  // 右 → 左 スワイプ → 次のページ
+  if (diff < -SWIPE_THRESHOLD && current < pages.length - 1) {
+    current++;
+    showPage();
+  }
+  // 左 → 右 スワイプ → 前のページ
+  else if (diff > SWIPE_THRESHOLD && current > 0) {
+    current--;
+    showPage();
+  }
+
+  startX = 0;
+});
+</script>
+
+</body>
+</html>
+
