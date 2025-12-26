@@ -1,1 +1,122 @@
-D test
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+  >
+  <title>日常横レイアウト漫画</title>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      overflow: hidden;
+
+      /* Safariバー込みで確実に収める */
+      width: 100vw;
+      height: 100svh;
+    }
+
+    #viewer {
+  width: 100vw;
+  height: 100svh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* 上下だけ safe-area を考慮 */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+
+    img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+      touch-action: none; /* ズーム・スワイプ干渉防止 */
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="viewer">
+  <img id="page" src="images/intro.png" alt="漫画ページ">
+</div>
+
+<script>
+  const pages = [
+    "images/intro.png",
+    "images/page1.jpg",
+    "images/page2.jpg",
+    "images/page3.jpg",
+    "images/page4.jpg",
+    "images/page5.jpg",
+    "images/page6.jpg",
+    "images/page7.jpg",
+    "images/page8.jpg",
+    "images/page9.jpg",
+    "images/outro.png"
+  ];
+
+  let current = 0;
+  const img = document.getElementById("page");
+
+  function showPage() {
+    img.src = pages[current];
+  }
+
+  // タップ（右端→次、左端→前）
+  document.addEventListener("click", (e) => {
+    const x = e.clientX;
+    const width = window.innerWidth;
+    const edge = width * 0.2;
+
+    if (x > width - edge && current < pages.length - 1) {
+      current++;
+      showPage();
+    }
+    if (x < edge && current > 0) {
+      current--;
+      showPage();
+    }
+  });
+
+  // スワイプ（右→前 / 左→次）
+  let startX = 0;
+  let isPinching = false;
+
+  document.addEventListener("touchstart", (e) => {
+    if (e.touches.length >= 2) {
+      isPinching = true;
+      return;
+    }
+    isPinching = false;
+    startX = e.touches[0].clientX;
+  });
+
+  document.addEventListener("touchend", (e) => {
+    if (isPinching) return;
+
+    const endX = e.changedTouches[0].clientX;
+    const diff = endX - startX;
+
+    if (diff < -50 && current < pages.length - 1) {
+      current++;
+      showPage();
+    }
+    if (diff > 50 && current > 0) {
+      current--;
+      showPage();
+    }
+  });
+</script>
+
+</body>
+</html>
